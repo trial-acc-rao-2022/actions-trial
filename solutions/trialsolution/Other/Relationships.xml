@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="business_unit_eql_application" />
+  <EntityRelationship Name="business_unit_eql_autonumconfig" />
+  <EntityRelationship Name="lk_eql_application_createdby" />
+  <EntityRelationship Name="lk_eql_application_modifiedby" />
+  <EntityRelationship Name="lk_eql_autonumconfig_createdby" />
+  <EntityRelationship Name="lk_eql_autonumconfig_modifiedby" />
+  <EntityRelationship Name="owner_eql_application" />
+  <EntityRelationship Name="owner_eql_autonumconfig" />
+  <EntityRelationship Name="team_eql_application" />
+  <EntityRelationship Name="team_eql_autonumconfig" />
+  <EntityRelationship Name="user_eql_application" />
+  <EntityRelationship Name="user_eql_autonumconfig" />
+</EntityRelationships>
