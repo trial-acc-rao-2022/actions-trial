@@ -94,7 +94,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: managedSolutions
-        path: out/ship/trialsolution.zip
+        path: ${{ inputs.solution_shipping_folder}}/${{ inputs.solution_name }}.zip
 
   release-to-staging:
     needs: [ convert-to-managed ]
