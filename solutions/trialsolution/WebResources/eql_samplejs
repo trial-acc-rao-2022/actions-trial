@@ -1,0 +1,211 @@
+﻿// @ts-ignore
+if (typeof (MAHScripts) == "undefined") { MAHScripts = {}; }
+if (typeof (MAHScripts.Quote) == "undefined") { MAHScripts.Quote = {}; }
+
+const SERVICEUNIT_NDIS = '915240000';
+const SERVICEUNIT_AH = '915240001';
+const SERVICEUNIT_HITH = '915240002';
+
+const QUOTETYPE_NDIS = '915240000';
+const QUOTETYPE_AH = '915240001';
+const QUOTETYPE_HITH = '915240002';
+
+const FORM_NDIS = 'NDIS Quote';
+const FORM__AlliedHealth = 'Allied Health Quote';
+const FORM__HITH = 'HITH Quote';
+
+MAHScripts.Quote.mtr_quotetype = 'mtr_quotetype';
+MAHScripts.Quote.mtr_referral = 'mtr_referral';
+MAHScripts.Quote.mtr_discipline = 'mtr_discipline';
+MAHScripts.Quote.mtr_patient = 'mtr_patient';
+
+MAHScripts.Quote.checkformtype = function (executionContext) {
+    var formToLoad = "";
+    var formContext = executionContext.getFormContext();
+    var currentForm = formContext.ui.formSelector.getCurrentItem();
+    var servunit = formContext.getAttribute("mtr_serviceunit").getValue();
+
+    if (servunit == SERVICEUNIT_NDIS) {
+
+        var quotetype = formContext.getAttribute("mtr_quotetype").setValue(915240000);
+        quotetype = formContext.getAttribute("mtr_quotetype").getValue();
+
+    }
+    if (servunit == SERVICEUNIT_AH) {
+
+        var quotetype = formContext.getAttribute("mtr_quotetype").setValue(915240001);
+        quotetype = formContext.getAttribute("mtr_quotetype").getValue();
+
+    }
+    if (servunit == SERVICEUNIT_HITH) {
+
+        var quotetype = formContext.getAttribute("mtr_quotetype").setValue(915240002);
+        quotetype = formContext.getAttribute("mtr_quotetype").getValue();
+
+    }
+    if (quotetype == QUOTETYPE_NDIS) {
+        formToLoad = FORM_NDIS;
+    }
+    if (quotetype == QUOTETYPE_AH) {
+        formToLoad = FORM__AlliedHealth;
+    }
+    else if (quotetype == QUOTETYPE_HITH) {
+        formToLoad = FORM__HITH;
+    }
+
+    if (formToLoad.length > 0) {
+        var availableForms = formContext.ui.formSelector.items.get();
+        if (currentForm.getLabel().toLowerCase() != formToLoad.toLowerCase()) {
+            for (var i in availableForms) {
+                var form = availableForms[i];
+                // try to find a form based on the name
+                if (form.getLabel().toLowerCase() == formToLoad.toLowerCase()) {
+                    form.navigate();
+                    return true;
+                }
+            }
+        }
+    }
+};
+
+MAHScripts.Quote.setPotentialCustomer = function (executionContext) {
+
+    var formContext = executionContext.getFormContext();
+    var patient = formContext.getAttribute("mtr_patient").getValue();
+
+    var IsValid = true;
+
+    if (formContext.getAttribute("mtr_patient").getValue() === null) {
+        IsValid = false;
+    }
+
+    if (IsValid) {
+        formContext.getAttribute("customerid").setValue(patient);
+    }
+};
+
+MAHScripts.Quote.onChangeReferral = function (executionContext) {
+    var formContext = executionContext.getFormContext();
+    var referral = formContext.getAttribute(MAHScripts.Quote.mtr_referral).getValue();
+    var discipline = formContext.getAttribute(MAHScripts.Quote.mtr_discipline).getValue();
+    var patient = formContext.getAttribute(MAHScripts.Quote.mtr_patient).getValue();
+    
+    if (referral != null) {
+        Xrm.WebApi.retrieveRecord(referral[0].entityType, referral[0].id, "?$select=_mtr_patient_value,_mtr_primarydiscipline_value&$expand=mtr_primarydiscipline($select=mtr_name)").then(
+            function success(result) {
+
+                if (result._mtr_primarydiscipline_value != null || result._mtr_primarydiscipline_value != undefined) {
+                    var lookup = new Array();
+                    lookup[0] = new Object;
+                    lookup[0].id = result._mtr_primarydiscipline_value;
+                    lookup[0].entityType = result["_mtr_primarydiscipline_value@Microsoft.Dynamics.CRM.lookuplogicalname"];
+                    lookup[0].name = result["_mtr_primarydiscipline_value@OData.Community.Display.V1.FormattedValue"];
+                    formContext.getAttribute(MAHScripts.Quote.mtr_discipline).setValue(lookup);
+                }
+                if (result._mtr_patient_value != null || result._mtr_patient_value != undefined) {
+                    var lookup = new Array();
+                    lookup[0] = new Object;
+                    lookup[0].id = result._mtr_patient_value;
+                    lookup[0].entityType = result["_mtr_patient_value@Microsoft.Dynamics.CRM.lookuplogicalname"];
+                    lookup[0].name = result["_mtr_patient_value@OData.Community.Display.V1.FormattedValue"];
+                    formContext.getAttribute(MAHScripts.Quote.mtr_patient).setValue(lookup);
+                }
+
+            },
+            function (error) {
+                console.log(error.message);
+                // handle error conditions
+            }
+        );
+    }
+    else {
+        if (discipline != null || discipline != undefined) {
+            formContext.getAttribute(MAHScripts.Quote.mtr_discipline).setValue(null);           
+        }
+        if (patient != null || patient != undefined) {
+            formContext.getAttribute(MAHScripts.Quote.mtr_patient).setValue(null);           
+        }
+    }
+}
+
+MAHScripts.Quote.onLoad = function (executionContext) {
+    
+    var formContext = executionContext.getFormContext();;
+    var formType = formContext.ui.getFormType();
+
+    if (formType == 1) {
+
+        if (formContext.getAttribute("mtr_preparedby") != null) {
+            formContext.getAttribute("mtr_preparedby").setRequiredLevel("none");
+            formContext.getAttribute("mtr_preparedby").setValue(null);
+            formContext.getAttribute("mtr_preparedby").setRequiredLevel("required");
+        }
+
+        if (formContext.getAttribute("mtr_clientrepresentative") != null) {
+            formContext.getAttribute("mtr_clientrepresentative").setRequiredLevel("none");
+            formContext.getAttribute("mtr_clientrepresentative").setValue(null);
+            formContext.getAttribute("mtr_clientrepresentative").setRequiredLevel("required");
+        }
+    }
+};
+
+MAHScripts.Quote.quoteDeclineEvent = function (primaryControl) { // When Decline Button is Clicked
+
+    var formContext = primaryControl;
+
+    var declineReasonValue = formContext.getAttribute("mtr_declinereason").getValue();
+    if (declineReasonValue == null) {
+        formContext.getControl("header_mtr_declinereason").setNotification("Required fields must be filled in.");
+    } else {
+        var quoteId = formContext.data.entity.getId().slice(1, -1);
+
+        var quoteEntity = {};
+        quoteEntity.mtr_declinedflag = true;
+
+        Xrm.WebApi.online.updateRecord("quote", quoteId, quoteEntity).then(
+            function success(result) {
+                var updatedEntityId = result.id;
+            },
+            function (error) {
+                Xrm.Utility.alertDialog(error.message);
+            }
+        );
+
+
+
+    }
+
+
+
+
+};
+
+//when the Declined Reason is Changed 
+MAHScripts.Quote.quoteDeclinedReasonIsPopulated = function (executionContext) { // onchange of Decline Reason
+
+    var formContext = executionContext.getFormContext();
+    var declineReasonValue = formContext.getAttribute("mtr_declinereason").getValue();
+    if (declineReasonValue != null) {
+        formContext.ui.clearFormNotification();
+        formContext.getControl("header_mtr_declinereason").clearNotification();
+    }
+};
+
+MAHScripts.Quote.quoteReviseEvent = function (primaryControl) {
+
+    var formContext = primaryControl;
+    var quoteId = formContext.data.entity.getId().slice(1, -1);
+
+    var quoteEntity = {};
+    quoteEntity.mtr_reviseflag = true;
+
+    Xrm.WebApi.online.updateRecord("quote", quoteId, quoteEntity).then(
+        function success(result) {
+            var updatedEntityId = result.id;
+        },
+        function (error) {
+            Xrm.Utility.alertDialog(error.message);
+        }
+    );
+
+}
