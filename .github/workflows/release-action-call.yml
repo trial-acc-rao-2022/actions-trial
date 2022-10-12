@@ -14,7 +14,7 @@ jobs:
       solution_name: trialsolution
       #Update your values here
       BUILD_ENVIRONMENT_URL: https://org8dc2600d.crm.dynamics.com/
-      PRODUCTION_ENVIRONMENT_URL: https://org846282bd.crm.dynamics.com/
+      PRODUCTION_ENVIRONMENT_URL: https://org0f99911c.crm.dynamics.com/
       CLIENT_ID: 6e5068ad-a8b7-41e2-b28f-359203d2a35c
       TENANT_ID: 690490e5-365d-4da4-8a02-9795ea4a0664      
     secrets:
