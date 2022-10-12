@@ -11,7 +11,7 @@ jobs:
     uses: ./.github/workflows/release-solution-with-inputs.yml
     with:
       #You can specify the solution name here
-      solution_name: ALMLab
+      solution_name: trialsolution
       #Update your values here
       BUILD_ENVIRONMENT_URL: https://org8dc2600d.crm.dynamics.com/
       PRODUCTION_ENVIRONMENT_URL: https://org846282bd.crm.dynamics.com/
