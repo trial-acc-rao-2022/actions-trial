@@ -80,6 +80,7 @@
     <RootComponents>
       <RootComponent type="1" schemaName="eql_application" behavior="0" />
       <RootComponent type="1" schemaName="eql_autonumconfig" behavior="0" />
+      <RootComponent type="61" schemaName="eql_samplejs" behavior="0" />
       <RootComponent type="62" schemaName="eql_trialapp" behavior="0" />
       <RootComponent type="80" schemaName="eql_trialapp" behavior="0" />
     </RootComponents>
