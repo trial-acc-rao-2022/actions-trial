@@ -11,7 +11,7 @@ on:
       solution_name:
         description: 'The solution name.'
         type: string
-        default: trialsolution
+        default: trialsolution       
       solution_shipping_folder:
         description: 'folder name for staging the exported solution *do not change*'        
         type: string
@@ -27,7 +27,7 @@ on:
       solution_release_folder:
        description: 'folder where the released binaries are going to be hosted *do not change*'
        type: string
-       default: out/release/
+       default: out/release
       BUILD_ENVIRONMENT_URL:
         description: 'Build environment url.'
         type: string
@@ -89,15 +89,14 @@ jobs:
         solution-name: ${{ inputs.solution_name }}
         managed: true
         solution-output-file: ${{ inputs.solution_shipping_folder}}/${{ inputs.solution_name }}.zip
-        working-directory: 'out'
 
     - name: Upload the ready to ship solution to GH artifact store
       uses: actions/upload-artifact@v2
       with:
         name: managedSolutions
-        path: ${{ inputs.solution_shipping_folder}}/${{ inputs.solution_name }}_managed.zip
+        path: ${{ inputs.solution_shipping_folder}}/${{ inputs.solution_name }}.zip
 
-  release-to-staging: 
+  release-to-staging:
     needs: [ convert-to-managed ]
     runs-on: windows-latest
     env:
@@ -112,7 +111,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: managedSolutions
-        path: ${{ inputs.solution_release_folder}}/
+        path: ${{ inputs.solution_release_folder}}
     - name: Import solution to prod env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
@@ -120,6 +119,6 @@ jobs:
         app-id: ${{inputs.CLIENT_ID}}
         client-secret: ${{ secrets.envSecret }}
         tenant-id: ${{inputs.TENANT_ID}}
-        solution-file: ${{ inputs.solution_release_folder}}/${{ inputs.solution_name }}_managed.zip
+        solution-file: ${{ inputs.solution_release_folder}}/${{ inputs.solution_name }}.zip
         force-overwrite: true
         publish-changes: true
